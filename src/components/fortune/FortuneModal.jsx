@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConditionSelect from './ConditionSelect';
@@ -10,15 +10,16 @@ import { filterRestaurants, getRandomItems } from '@/utils/filter';
 import { generateFortune } from '@/utils/fortune';
 import useFortuneStore from '@/hooks/useFortuneStore';
 
+const SHAKE_DURATION_MS = 2800;
+
 export default function FortuneModal({ open, onClose }) {
   const [step, setStep] = useState(0);
   const [conditions, setConditions] = useState({});
   const [candidates, setCandidates] = useState([]);
   const [result, setResult] = useState(null);
   const [fortune, setFortune] = useState(null);
+  const candidatesRef = useRef([]);
   const { addToHistory, getRecentIds } = useFortuneStore();
-
-  if (!open) return null;
 
   const handleConditionsSubmit = (conds) => {
     setConditions(conds);
@@ -33,31 +34,36 @@ export default function FortuneModal({ open, onClose }) {
 
   const handleStartShake = () => {
     if (candidates.length === 0) return;
+    candidatesRef.current = candidates;
     setStep(2);
-    setTimeout(() => {
-      const picked = candidates[Math.floor(Math.random() * candidates.length)];
+  };
+
+  useEffect(() => {
+    if (step !== 2) return;
+    const pool = candidatesRef.current;
+    if (!pool || pool.length === 0) {
+      setStep(1);
+      return;
+    }
+    const timer = setTimeout(() => {
+      const picked = pool[Math.floor(Math.random() * pool.length)];
       const fortuneResult = generateFortune();
       setResult(picked);
       setFortune(fortuneResult);
       addToHistory({ restaurantId: picked.id, restaurantName: picked.name, fortune: fortuneResult.level });
       setStep(3);
-    }, 2800);
-  };
+    }, SHAKE_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [step, addToHistory]);
 
   const handleReshake = () => {
     const others = candidates.filter(c => !result || c.id !== result.id);
     if (others.length > 0) {
+      candidatesRef.current = others;
       setStep(2);
-      setTimeout(() => {
-        const picked = others[Math.floor(Math.random() * others.length)];
-        const fortuneResult = generateFortune();
-        setResult(picked);
-        setFortune(fortuneResult);
-        addToHistory({ restaurantId: picked.id, restaurantName: picked.name, fortune: fortuneResult.level });
-        setStep(3);
-      }, 2800);
     } else {
-      handleStartShake();
+      candidatesRef.current = candidates;
+      setStep(2);
     }
   };
 
@@ -73,6 +79,8 @@ export default function FortuneModal({ open, onClose }) {
     handleReset();
     onClose();
   };
+
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -118,7 +126,7 @@ export default function FortuneModal({ open, onClose }) {
 
         {/* Content */}
         <div className="overflow-y-auto max-h-[60vh] p-4">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="sync">
             {step === 0 && (
               <motion.div key="conditions" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <ConditionSelect onSubmit={handleConditionsSubmit} />
@@ -145,8 +153,12 @@ export default function FortuneModal({ open, onClose }) {
                   restaurant={result}
                   fortune={fortune}
                   onReshake={handleReshake}
-                  onClose={handleClose}
                 />
+              </motion.div>
+            )}
+            {step === 3 && (!result || !fortune) && (
+              <motion.div key="result-placeholder" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-8 text-center text-muted-foreground text-sm">
+                结果生成中…
               </motion.div>
             )}
           </AnimatePresence>
