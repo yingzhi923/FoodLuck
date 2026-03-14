@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { CAMPUS_CENTER } from '@/data/constants';
 import { useAMap } from '@/contexts/AMapContext';
 
+// 松江大学城范围，约 5km 视野
 const MAP_BOUNDS = {
   lngMin: 121.212,
   lngMax: 121.228,
