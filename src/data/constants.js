@@ -62,7 +62,8 @@ export const FORTUNE_LEVELS = [
   },
 ];
 
-export const CAMPUS_CENTER = { lng: 121.218, lat: 31.038 };
+// 上海外国语大学松江校区 文翔路1550号（201620）
+export const CAMPUS_CENTER = { lng: 121.2165, lat: 31.0368 };
 
 export const SCHOOLS = [
   '东华大学', '上海外国语大学', '华东政法大学',

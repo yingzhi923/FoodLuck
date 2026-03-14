@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
+import L from 'leaflet';
 import { cn } from '@/lib/utils';
 import { CAMPUS_CENTER } from '@/data/constants';
 import { useAMap } from '@/contexts/AMapContext';
@@ -16,19 +17,9 @@ function coordToPercent(lng, lat) {
   return { x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) };
 }
 
-/*
- * ===== 高德地图接入说明 =====
- *
- * 1. 在 index.html 的 <head> 中加入：
- *    <script src="https://webapi.amap.com/maps?v=2.0&key=你的KEY&plugin=AMap.Walking"></script>
- *
- * 2. 在 .env 中设置（可选）：
- *    VITE_AMAP_KEY=你的KEY
- *
- * 3. 本组件会自动检测 window.AMap 是否存在：
- *    - 存在 → 使用真实高德地图
- *    - 不存在 → 使用占位地图（当前模式）
- */
+function toLeafletLatLng(coords) {
+  return [coords.lat, coords.lng];
+}
 
 export default function MapView({
   restaurants = [],
@@ -38,80 +29,94 @@ export default function MapView({
   className,
 }) {
   const mapContainerRef = useRef(null);
-  const amapRef = useRef(null);
-  const markersRef = useRef([]);
-  const [useAmap, setUseAmap] = useState(false);
+  const mapRef = useRef(null);
+  const markersLayerRef = useRef(null);
   const { setMap, clearRoute } = useAMap() || {};
+  const maptilerKey = import.meta.env.VITE_MAPTILER_KEY;
+  const useRealMap = Boolean(maptilerKey);
 
-  // Check if AMap SDK is loaded
+  // Initialize Leaflet map once when container is ready and key exists
   useEffect(() => {
-    if (window.AMap) {
-      setUseAmap(true);
-    }
-  }, []);
+    if (!maptilerKey || !mapContainerRef.current || mapRef.current) return;
 
-  // Initialize AMap if available
-  useEffect(() => {
-    if (!useAmap || !mapContainerRef.current || amapRef.current) return;
-
-    const map = new window.AMap.Map(mapContainerRef.current, {
+    const center = toLeafletLatLng(CAMPUS_CENTER);
+    const map = L.map(mapContainerRef.current, {
+      center,
       zoom: 15,
-      center: [CAMPUS_CENTER.lng, CAMPUS_CENTER.lat],
     });
-    amapRef.current = map;
+
+    L.tileLayer(
+      `https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=${maptilerKey}`,
+      {
+        attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+        crossOrigin: true,
+      }
+    ).addTo(map);
+
+    mapRef.current = map;
     setMap?.(map);
-    const resizeTimer = setTimeout(() => map.resize(), 100);
 
     return () => {
-      clearTimeout(resizeTimer);
       clearRoute?.();
-      map.destroy();
-      amapRef.current = null;
+      map.remove();
+      mapRef.current = null;
       setMap?.(null);
     };
-  }, [useAmap, setMap, clearRoute]);
+  }, [maptilerKey]);
 
-  // Update AMap markers (with optional cluster when many points)
+  // Update markers when restaurants, selectedId, highlightIds change
   useEffect(() => {
-    if (!useAmap || !amapRef.current) return;
-    const map = amapRef.current;
+    if (!useRealMap || !mapRef.current) return;
+    const map = mapRef.current;
+
+    if (markersLayerRef.current) {
+      map.removeLayer(markersLayerRef.current);
+      markersLayerRef.current = null;
+    }
+
     const highlightSet = new Set(highlightIds || []);
 
-    // Clear old markers or cluster
-    markersRef.current.forEach(m => map.remove(m));
-    markersRef.current = [];
-
-    const markerList = restaurants.map(r => {
+    const layerGroup = L.layerGroup();
+    restaurants.forEach((r) => {
       const isSelected = r.id === selectedId;
       const isHighlighted = highlightSet.has(r.id);
       const size = isSelected ? 32 : isHighlighted ? 24 : 16;
-      const marker = new window.AMap.Marker({
-        position: [r.coordinates.lng, r.coordinates.lat],
-        title: r.name,
-        extData: { id: r.id },
-        offset: new window.AMap.Pixel(-size / 2, -size / 2),
-        content: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${isSelected ? '#F97316' : isHighlighted ? '#FB923C' : '#FDBA74'};display:flex;align-items:center;justify-content:center;color:white;font-size:${isSelected ? 12 : 8}px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.2);cursor:pointer;transition:all 0.2s">${isSelected || isHighlighted ? r.name.slice(0, 1) : ''}</div>`,
+      const bg = isSelected ? '#F97316' : isHighlighted ? '#FB923C' : '#FDBA74';
+      const icon = L.divIcon({
+        className: 'leaflet-marker-div',
+        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;color:white;font-size:${isSelected ? 12 : 8}px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.2);cursor:pointer;transition:all 0.2s;border:none;pointer-events:auto">${isSelected || isHighlighted ? r.name.slice(0, 1) : ''}</div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
       });
-      marker.on('click', () => onMarkerClick?.(r.id));
-      if (isSelected) map.setCenter([r.coordinates.lng, r.coordinates.lat]);
-      return marker;
+
+      const marker = L.marker(toLeafletLatLng(r.coordinates), { icon })
+        .on('click', () => onMarkerClick?.(r.id));
+
+      const popupContent = `<div class="text-sm"><strong>${r.name}</strong><br/>¥${r.avgPrice}/人 · ${r.walkingMinutes}分钟</div>`;
+      marker.bindPopup(popupContent);
+      layerGroup.addLayer(marker);
     });
 
-    if (restaurants.length > 25) {
-      window.AMap.plugin(['AMap.MarkerCluster'], () => {
-        const cluster = new window.AMap.MarkerCluster(map, markerList, { gridSize: 60 });
-        markersRef.current = [cluster];
-      });
-    } else {
-      markerList.forEach(m => {
-        map.add(m);
-        markersRef.current.push(m);
-      });
-    }
-  }, [useAmap, restaurants, selectedId, highlightIds, onMarkerClick]);
+    layerGroup.addTo(map);
+    markersLayerRef.current = layerGroup;
 
-  // === AMap mode ===
-  if (useAmap) {
+    if (selectedId) {
+      const selected = restaurants.find((r) => r.id === selectedId);
+      if (selected) {
+        map.flyTo(toLeafletLatLng(selected.coordinates), 16, { duration: 0.3 });
+      }
+    }
+
+    if (highlightIds?.length > 0) {
+      const highlighted = restaurants.filter((r) => highlightSet.has(r.id));
+      if (highlighted.length > 0) {
+        const bounds = L.latLngBounds(highlighted.map((r) => toLeafletLatLng(r.coordinates)));
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
+      }
+    }
+  }, [useRealMap, restaurants, selectedId, highlightIds, onMarkerClick]);
+
+  if (useRealMap) {
     return (
       <div
         ref={mapContainerRef}
@@ -121,14 +126,15 @@ export default function MapView({
     );
   }
 
-  // === Placeholder mode ===
-  return <PlaceholderMap
-    restaurants={restaurants}
-    selectedId={selectedId}
-    highlightIds={highlightIds}
-    onMarkerClick={onMarkerClick}
-    className={className}
-  />;
+  return (
+    <PlaceholderMap
+      restaurants={restaurants}
+      selectedId={selectedId}
+      highlightIds={highlightIds}
+      onMarkerClick={onMarkerClick}
+      className={className}
+    />
+  );
 }
 
 function PlaceholderMap({ restaurants, selectedId, highlightIds, onMarkerClick, className }) {
@@ -212,7 +218,7 @@ function PlaceholderMap({ restaurants, selectedId, highlightIds, onMarkerClick, 
       })}
 
       <div className="absolute bottom-2 right-2 text-[10px] text-muted-foreground/40">
-        占位地图 · 高德地图接入中
+        占位地图 · 配置 VITE_MAPTILER_KEY 显示地图
       </div>
     </div>
   );

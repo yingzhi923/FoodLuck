@@ -23,7 +23,7 @@ export default function RestaurantCard({ restaurant, compact = false, onSelect, 
 
   const handleNav = (e) => {
     e.stopPropagation();
-    const url = `https://uri.amap.com/navigation?to=${r.coordinates.lng},${r.coordinates.lat},${encodeURIComponent(r.name)}&mode=walking&callnative=1`;
+    const url = `https://www.openstreetmap.org/?mlat=${r.coordinates.lat}&mlon=${r.coordinates.lng}&zoom=17`;
     window.open(url, '_blank');
   };
 
@@ -133,7 +133,7 @@ export default function RestaurantCard({ restaurant, compact = false, onSelect, 
             className="flex items-center justify-center gap-1 flex-1 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
           >
             <Navigation className="w-3 h-3" />
-            去这里
+            打开地图
           </button>
         </div>
       </div>

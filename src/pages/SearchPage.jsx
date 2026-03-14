@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, TrendingUp, Clock } from 'lucide-react';
 import RestaurantCard from '@/components/RestaurantCard';
 import restaurants from '@/data/restaurants';
-import { loadAMapPlugins } from '@/lib/amapLoader';
 
 const HOT_SEARCHES = ['麻辣烫', '奶茶', '拉面', '烧烤', '火锅', '咖啡', '炸鸡', '日料'];
 
@@ -11,39 +10,11 @@ export default function SearchPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
-  const autoCompleteRef = useRef(null);
-  const autoCompleteListenerRef = useRef(null);
   const [recentSearches] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('recent_searches') || '[]');
     } catch { return []; }
   });
-
-  useEffect(() => {
-    if (!window.AMap || !inputRef.current) return;
-    let cancelled = false;
-    loadAMapPlugins(['AMap.AutoComplete'])
-      .then(() => {
-        if (cancelled || !inputRef.current) return;
-        const auto = new window.AMap.AutoComplete({ input: 'search-page-input', city: '上海' });
-        autoCompleteRef.current = auto;
-        const onSelect = (e) => {
-          if (e.poi?.name) setQuery(e.poi.name);
-        };
-        window.AMap.event.addListener(auto, 'select', onSelect);
-        autoCompleteListenerRef.current = { auto, onSelect };
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-      const listener = autoCompleteListenerRef.current;
-      if (listener) {
-        window.AMap.event.removeListener(listener.auto, 'select', listener.onSelect);
-      }
-      autoCompleteListenerRef.current = null;
-      autoCompleteRef.current = null;
-    };
-  }, []);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];

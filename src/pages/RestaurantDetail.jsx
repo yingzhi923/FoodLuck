@@ -33,7 +33,7 @@ export default function RestaurantDetail() {
   const gradient = CUISINE_GRADIENTS[r.cuisine] || CUISINE_GRADIENTS.default;
 
   const handleNav = () => {
-    const url = `https://uri.amap.com/navigation?to=${r.coordinates.lng},${r.coordinates.lat},${encodeURIComponent(r.name)}&mode=walking&callnative=1`;
+    const url = `https://www.openstreetmap.org/?mlat=${r.coordinates.lat}&mlon=${r.coordinates.lng}&zoom=17`;
     window.open(url, '_blank');
   };
 
@@ -130,7 +130,7 @@ export default function RestaurantDetail() {
             className="flex-1 py-3 rounded-xl text-sm font-semibold bg-primary text-primary-foreground flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity"
           >
             <Navigation className="w-4 h-4" />
-            一键导航
+            打开地图
           </button>
         </div>
       </div>

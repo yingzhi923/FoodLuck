@@ -1,50 +1,48 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import L from 'leaflet';
 
 const AMapContext = createContext(null);
 
+function toLeafletLatLng(point) {
+  if (Array.isArray(point)) {
+    return point.length >= 2 ? [point[1], point[0]] : null;
+  }
+  return point && typeof point.lat === 'number' && typeof point.lng === 'number'
+    ? [point.lat, point.lng]
+    : null;
+}
+
 export function AMapProvider({ children }) {
   const [map, setMap] = useState(null);
-  const routeOverlaysRef = useRef([]);
+  const routePolylineRef = useRef(null);
 
   const clearRoute = useCallback(() => {
     if (!map) return;
-    routeOverlaysRef.current.forEach((overlay) => {
+    if (routePolylineRef.current) {
       try {
-        map.remove(overlay);
+        map.removeLayer(routePolylineRef.current);
       } catch (_) {}
-    });
-    routeOverlaysRef.current = [];
+      routePolylineRef.current = null;
+    }
   }, [map]);
 
   const drawWalkingRoute = useCallback((origin, dest) => {
-    if (!window.AMap || !map) return Promise.reject(new Error('Map not ready'));
-    return new Promise((resolve, reject) => {
-      window.AMap.plugin(['AMap.Walking'], () => {
-        clearRoute();
-        const walking = new window.AMap.Walking({ map });
-        const start = Array.isArray(origin) ? origin : [origin.lng, origin.lat];
-        const end = Array.isArray(dest) ? dest : [dest.lng, dest.lat];
-        walking.search(start, end, (status, result) => {
-          if (status === 'complete' && result.routes && result.routes.length) {
-            const path = result.routes[0].steps.flatMap((s) => s.path || []);
-            if (path.length) {
-              const polyline = new window.AMap.Polyline({
-                path,
-                strokeColor: '#F97316',
-                strokeWeight: 6,
-                strokeOpacity: 0.9,
-              });
-              map.add(polyline);
-              routeOverlaysRef.current.push(polyline);
-              map.setFitView([path], 40);
-            }
-            resolve(result);
-          } else {
-            reject(new Error('Route not found'));
-          }
-        });
-      });
+    if (!map) return Promise.reject(new Error('Map not ready'));
+    const start = toLeafletLatLng(origin);
+    const end = toLeafletLatLng(dest);
+    if (!start || !end) return Promise.reject(new Error('Invalid coordinates'));
+
+    clearRoute();
+    const latlngs = [start, end];
+    const polyline = L.polyline(latlngs, {
+      color: '#F97316',
+      weight: 6,
+      opacity: 0.9,
     });
+    polyline.addTo(map);
+    routePolylineRef.current = polyline;
+    map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+    return Promise.resolve();
   }, [map, clearRoute]);
 
   const value = {
