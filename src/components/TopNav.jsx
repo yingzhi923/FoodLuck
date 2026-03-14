@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, Search, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import iconPng from '@/assets/brand/icon.png';
 
 function getStoredSchool() {
   try { return localStorage.getItem('selected_school') || '东华大学'; }
@@ -25,7 +26,7 @@ export default function TopNav({ onFortuneClick }) {
           onClick={onFortuneClick}
           className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-orange-400 text-white font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition-all"
         >
-          <span className="text-base">🏮</span>
+          <img src={iconPng} alt="" className="w-5 h-5 object-contain" />
           <span>今日食运</span>
         </button>
 

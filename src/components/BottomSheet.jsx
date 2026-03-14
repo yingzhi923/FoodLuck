@@ -1,14 +1,16 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
-const SNAP_COLLAPSED = 45;
-const SNAP_EXPANDED = 85;
+const SNAP_COLLAPSED = 8;
+const SNAP_EXPANDED = 50;
 
 export default function BottomSheet({ children, className }) {
   const [height, setHeight] = useState(SNAP_COLLAPSED);
   const dragging = useRef(false);
   const startY = useRef(0);
   const startHeight = useRef(SNAP_COLLAPSED);
+
+  const isExpanded = height > (SNAP_COLLAPSED + SNAP_EXPANDED) / 2;
 
   const onPointerDown = useCallback((e) => {
     dragging.current = true;
@@ -22,7 +24,7 @@ export default function BottomSheet({ children, className }) {
     const delta = startY.current - e.clientY;
     const vh = window.innerHeight;
     const deltaPercent = (delta / vh) * 100;
-    const next = Math.max(20, Math.min(SNAP_EXPANDED, startHeight.current + deltaPercent));
+    const next = Math.max(SNAP_COLLAPSED, Math.min(SNAP_EXPANDED, startHeight.current + deltaPercent));
     setHeight(next);
   }, []);
 
@@ -50,13 +52,22 @@ export default function BottomSheet({ children, className }) {
       onPointerLeave={onPointerUp}
     >
       <div
-        className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing touch-none"
+        className="flex flex-col items-center pt-2 pb-1 cursor-grab active:cursor-grabbing touch-none"
         onPointerDown={onPointerDown}
         onDoubleClick={toggleExpand}
+        onClick={() => !isExpanded && toggleExpand()}
       >
-        <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+        <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+        {!isExpanded && (
+          <p className="text-xs text-muted-foreground mt-1.5">附近热榜</p>
+        )}
       </div>
-      <div className="overflow-y-auto h-[calc(100%-20px)] overscroll-contain px-4 pb-safe">
+      <div
+        className={cn(
+          'overflow-y-auto overscroll-contain px-4 pb-safe',
+          isExpanded ? 'h-[calc(100%-20px)]' : 'h-0 overflow-hidden'
+        )}
+      >
         {children}
       </div>
     </div>

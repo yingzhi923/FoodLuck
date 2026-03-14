@@ -8,6 +8,7 @@ const restaurants = [
     recommendReason: '人均18，5分钟到，赶课必备。', recommendedDishes: ['牛肉拉面', '干拌面', '牛肉盖饭'],
     isChain: false, spicyLevel: '微辣', suitableForSolo: true, suitableForGroup: false,
     openHours: '06:30-22:00', featured: true,
+    isHot: true, hotRank: 1,
   },
   {
     id: '2', name: '重庆小面馆', campusTown: '松江大学城',
@@ -48,6 +49,7 @@ const restaurants = [
     recommendReason: '3个人人均30，辣爽解压，聚餐首选。', recommendedDishes: ['辣椒炒肉', '剁椒鱼头', '小炒黄牛肉'],
     isChain: false, spicyLevel: '辣', suitableForSolo: false, suitableForGroup: true,
     openHours: '11:00-14:00,17:00-21:30', featured: true,
+    isHot: true, hotRank: 2,
   },
   {
     id: '6', name: '川香阁', campusTown: '松江大学城',
@@ -78,6 +80,7 @@ const restaurants = [
     recommendReason: '比食堂还近，16块一大碗，考试周救星。', recommendedDishes: ['红烧排骨饭', '鱼香肉丝饭', '宫保鸡丁饭'],
     isChain: false, spicyLevel: '微辣', suitableForSolo: true, suitableForGroup: false,
     openHours: '10:00-22:00', featured: true,
+    isHot: true, hotRank: 3,
   },
   {
     id: '9', name: '黄焖鸡米饭', campusTown: '松江大学城',
@@ -318,6 +321,7 @@ const restaurants = [
     recommendReason: '下午不想上课就来喝杯奶茶吃个菠萝油。', recommendedDishes: ['菠萝油', '丝袜奶茶', '干炒牛河'],
     isChain: false, spicyLevel: '不辣', suitableForSolo: true, suitableForGroup: true,
     openHours: '09:00-22:00', featured: true,
+    isHot: true, hotRank: 4,
   },
   {
     id: '33', name: '鸡公煲', campusTown: '松江大学城',

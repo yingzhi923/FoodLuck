@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import iconPng from '@/assets/brand/icon.png';
 
 const LOADING_TEXTS = [
   '今日食运加载中...',
@@ -37,8 +38,7 @@ export default function ShakeAnimation({ candidates }) {
   }, [candidates.length, speed]);
 
   return (
-    <div className="flex flex-col items-center justify-center py-8">
-      {/* Fortune stick animation */}
+    <div className="flex flex-col items-center justify-center py-6">
       <motion.div
         animate={{
           rotate: [0, -8, 8, -5, 5, -3, 3, 0],
@@ -49,12 +49,11 @@ export default function ShakeAnimation({ candidates }) {
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className="text-7xl mb-6"
+        className="mb-6"
       >
-        🏮
+        <img src={iconPng} alt="今日食运" className="w-20 h-20 object-contain drop-shadow-lg" />
       </motion.div>
 
-      {/* Scrolling candidates */}
       <div className="relative h-12 w-full overflow-hidden rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/50 mb-4">
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.div
@@ -70,7 +69,6 @@ export default function ShakeAnimation({ candidates }) {
         </div>
       </div>
 
-      {/* Loading text */}
       <motion.p
         key={textIndex}
         initial={{ opacity: 0 }}
@@ -80,7 +78,6 @@ export default function ShakeAnimation({ candidates }) {
         {LOADING_TEXTS[textIndex]}
       </motion.p>
 
-      {/* Decorative dots */}
       <div className="flex gap-1.5 mt-4">
         {[0, 1, 2].map(i => (
           <motion.div

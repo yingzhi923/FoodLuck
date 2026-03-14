@@ -3,26 +3,27 @@ import { RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { CUISINE_GRADIENTS } from '@/data/constants';
+import iconPng from '@/assets/brand/icon.png';
 
 export default function FortuneResult({ restaurant, fortune, onReshake }) {
   const r = restaurant;
   const gradient = CUISINE_GRADIENTS[r.cuisine] || CUISINE_GRADIENTS.default;
 
   return (
-    <div className="space-y-4">
-      {/* Fortune level */}
+    <div className="space-y-3">
+      {/* Fortune level - compact */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', damping: 10, stiffness: 100, delay: 0.1 }}
         className="text-center"
       >
-        <p className="text-4xl mb-1">{fortune.emoji}</p>
+        <img src={iconPng} alt="" className="w-10 h-10 object-contain mx-auto mb-1" />
         <h3 className={cn('text-2xl font-black', fortune.color)}>{fortune.level}</h3>
-        <p className="text-sm text-muted-foreground mt-1">{fortune.message}</p>
+        <p className="text-sm text-muted-foreground mt-0.5">{fortune.message}</p>
       </motion.div>
 
-      {/* Result: restaurant name + brief info */}
+      {/* Result card */}
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -36,7 +37,7 @@ export default function FortuneResult({ restaurant, fortune, onReshake }) {
         </div>
       </motion.div>
 
-      {/* Re-shake only */}
+      {/* Re-shake */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
