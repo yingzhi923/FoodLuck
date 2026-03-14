@@ -57,12 +57,13 @@ export default function MapView({
     const map = new window.AMap.Map(mapContainerRef.current, {
       zoom: 15,
       center: [CAMPUS_CENTER.lng, CAMPUS_CENTER.lat],
-      mapStyle: 'amap://styles/fresh',
     });
     amapRef.current = map;
     setMap?.(map);
+    const resizeTimer = setTimeout(() => map.resize(), 100);
 
     return () => {
+      clearTimeout(resizeTimer);
       clearRoute?.();
       map.destroy();
       amapRef.current = null;
@@ -115,7 +116,7 @@ export default function MapView({
       <div
         ref={mapContainerRef}
         id="map-container"
-        className={cn('relative w-full', className)}
+        className={cn('relative w-full h-full', className)}
       />
     );
   }

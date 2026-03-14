@@ -42,7 +42,7 @@ export default function Index() {
   }, []);
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-background">
+    <div className="relative h-screen w-screen overflow-hidden bg-background">
       <TopNav onFortuneClick={() => setFortuneOpen(true)} />
 
       <MapView
