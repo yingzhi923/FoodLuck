@@ -1,12 +1,12 @@
 import React from 'react';
-import { RefreshCw, Navigation } from 'lucide-react';
+import { RefreshCw, Navigation, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { CUISINE_GRADIENTS } from '@/data/constants';
 import iconPng from '@/assets/brand/icon.png';
 
-export default function FortuneResult({ restaurant, fortune, onReshake }) {
+export default function FortuneResult({ restaurant, fortune, onReshake, onBack }) {
   const r = restaurant;
   const gradient = CUISINE_GRADIENTS[r.cuisine] || CUISINE_GRADIENTS.default;
 
@@ -67,6 +67,24 @@ export default function FortuneResult({ restaurant, fortune, onReshake }) {
           重新摇签
         </button>
       </motion.div>
+
+      {/* Back to mode select (今日宜食 / 抽一签 / 许个愿) */}
+      {onBack && (
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <button
+            type="button"
+            onClick={onBack}
+            className="w-full py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            返回
+          </button>
+        </motion.div>
+      )}
     </div>
   );
 }

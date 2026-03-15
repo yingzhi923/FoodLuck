@@ -11,7 +11,7 @@ import restaurants from '@/data/restaurants';
 import { filterRestaurants, getRandomItems } from '@/utils/filter';
 import { generateFortune } from '@/utils/fortune';
 import useFortuneStore from '@/hooks/useFortuneStore';
-import { getTodayOffers } from '@/data/memberDayOffers';
+import { getTodayOffers, getOffersByWeekday } from '@/data/memberDayOffers';
 import iconPng from '@/assets/brand/icon.png';
 
 const SHAKE_DURATION_MS = 2800;
@@ -20,6 +20,8 @@ const MODE_SELECT = 'mode';
 const MODE_DRAW = 'draw';
 const MODE_WISH = 'wish';
 const MODE_TODAY = 'today';
+
+const exitAbsolute = { position: 'absolute', left: 0, right: 0, top: 0 };
 
 export default function FortuneModal({ open, onClose }) {
   const [mode, setMode] = useState(MODE_SELECT);
@@ -131,13 +133,18 @@ export default function FortuneModal({ open, onClose }) {
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         className="relative w-full max-w-[600px] bg-background rounded-t-3xl sm:rounded-3xl max-h-[88vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border/50 shrink-0">
+        {/* Header - z-10 so back button is always clickable above content */}
+        <div className="relative z-10 flex items-center justify-between p-4 border-b border-border/50 shrink-0 bg-background">
           <div className="flex items-center gap-2">
             {showBackButton && (
               <button
-                onClick={handleBackToMode}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBackToMode();
+                }}
                 className="w-7 h-7 rounded-full bg-muted flex items-center justify-center hover:bg-muted-foreground/10 mr-1"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -169,11 +176,11 @@ export default function FortuneModal({ open, onClose }) {
         )}
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 p-4">
+        <div className="relative overflow-y-auto flex-1 min-h-0 pt-2 px-4 pb-4">
           <AnimatePresence mode="sync">
             {/* Mode selection */}
             {mode === MODE_SELECT && (
-              <motion.div key="mode-select" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+              <motion.div key="mode-select" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ ...exitAbsolute, opacity: 0, y: -10 }}>
                 <ModeSelectView
                   onTodayClick={() => setMode(MODE_TODAY)}
                   onDrawClick={() => setMode(MODE_DRAW)}
@@ -184,12 +191,12 @@ export default function FortuneModal({ open, onClose }) {
 
             {/* Draw flow */}
             {mode === MODE_DRAW && step === 0 && (
-              <motion.div key="conditions" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <motion.div key="conditions" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ ...exitAbsolute, opacity: 0, x: -20 }}>
                 <ConditionSelect onSubmit={handleConditionsSubmit} onQuickStart={handleQuickStart} />
               </motion.div>
             )}
             {mode === MODE_DRAW && step === 1 && (
-              <motion.div key="candidates" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <motion.div key="candidates" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ ...exitAbsolute, opacity: 0, x: -20 }}>
                 <CandidatePool
                   candidates={candidates}
                   setCandidates={setCandidates}
@@ -199,16 +206,17 @@ export default function FortuneModal({ open, onClose }) {
               </motion.div>
             )}
             {mode === MODE_DRAW && step === 2 && (
-              <motion.div key="shaking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <motion.div key="shaking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ ...exitAbsolute, opacity: 0 }}>
                 <ShakeAnimation candidates={candidates} />
               </motion.div>
             )}
             {mode === MODE_DRAW && step === 3 && result && fortune && (
-              <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+              <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ ...exitAbsolute, opacity: 0 }}>
                 <FortuneResult
                   restaurant={result}
                   fortune={fortune}
                   onReshake={handleReshake}
+                  onBack={handleBackToMode}
                 />
               </motion.div>
             )}
@@ -220,14 +228,14 @@ export default function FortuneModal({ open, onClose }) {
 
             {/* Today deals flow */}
             {mode === MODE_TODAY && (
-              <motion.div key="today" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <motion.div key="today" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ ...exitAbsolute, opacity: 0, x: -20 }}>
                 <TodayDealsPanel />
               </motion.div>
             )}
 
             {/* Wish flow */}
             {mode === MODE_WISH && (
-              <motion.div key="wish" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <motion.div key="wish" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ ...exitAbsolute, opacity: 0, x: -20 }}>
                 <WishPanel onSelectRestaurant={() => {}} selectedId={null} />
               </motion.div>
             )}
@@ -242,7 +250,7 @@ function ModeSelectView({ onTodayClick, onDrawClick, onWishClick }) {
   const todayLabel = ['周日','周一','周二','周三','周四','周五','周六'][new Date().getDay()];
 
   return (
-    <div className="space-y-4 py-2">
+    <div className="space-y-4 pt-0 pb-2">
       <p className="text-center text-sm text-muted-foreground">选择你想怎么决定今天吃什么</p>
 
       <button
@@ -294,7 +302,12 @@ function ModeSelectView({ onTodayClick, onDrawClick, onWishClick }) {
 }
 
 function TodayDealsPanel() {
-  const todayData = getTodayOffers();
+  const [viewTomorrow, setViewTomorrow] = useState(false);
+  const todayWeekday = new Date().getDay();
+  const tomorrowWeekday = (todayWeekday + 1) % 7;
+  const displayData = viewTomorrow
+    ? getOffersByWeekday(tomorrowWeekday)
+    : getTodayOffers();
 
   const handleDealClick = (brand) => {
     toast('现在为您一键导航…（ps 此功能稍后上线哦）');
@@ -305,12 +318,19 @@ function TodayDealsPanel() {
       <div className="text-center">
         <h3 className="text-lg font-bold">今日宜食</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          今天是{todayData.title}，这些品牌更划算
+          {viewTomorrow ? `明天是${displayData.title}，这些品牌更划算` : `今天是${displayData.title}，这些品牌更划算`}
         </p>
+        <button
+          type="button"
+          onClick={() => setViewTomorrow(!viewTomorrow)}
+          className="mt-2 px-4 py-1.5 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700 hover:bg-emerald-200 active:scale-95 transition-all"
+        >
+          {viewTomorrow ? '看今天' : '看明天'}
+        </button>
       </div>
 
       <div className="space-y-2">
-        {todayData.items.map((item, i) => (
+        {displayData.items.map((item, i) => (
           <button
             key={`${item.brand}-${i}`}
             onClick={() => handleDealClick(item.brand)}

@@ -93,4 +93,9 @@ export function getTodayOffers() {
   return memberDayOffers.find(d => d.weekday === today) || memberDayOffers[0];
 }
 
+/** Get offers for a specific weekday (0=周日, 1=周一, ..., 6=周六) */
+export function getOffersByWeekday(weekday) {
+  return memberDayOffers.find(d => d.weekday === weekday) || memberDayOffers[0];
+}
+
 export default memberDayOffers;
