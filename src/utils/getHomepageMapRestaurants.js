@@ -32,11 +32,15 @@ const ZONE_ORDER = ['center', 'north', 'south', 'east', 'west'];
 
 /**
  * 从一组餐厅中按品类多样性选取最多 n 家（确定性：同 id 顺序一致）
+ * excludeIds: 已预选的 id 集合，跳过这些
  */
-function pickDiverse(zoneRestaurants, n) {
-  if (zoneRestaurants.length <= n) return zoneRestaurants.slice();
+function pickDiverse(zoneRestaurants, n, excludeIds) {
+  const pool = excludeIds
+    ? zoneRestaurants.filter((r) => !excludeIds.has(r.id))
+    : zoneRestaurants;
+  if (pool.length <= n) return pool.slice();
   const byCuisine = {};
-  for (const r of zoneRestaurants) {
+  for (const r of pool) {
     const c = r.cuisine || '其他';
     if (!byCuisine[c]) byCuisine[c] = [];
     byCuisine[c].push(r);
@@ -73,6 +77,11 @@ export function getHomepageMapRestaurants(restaurants) {
   if (!Array.isArray(restaurants) || restaurants.length === 0) return [];
   if (restaurants.length <= HOMEPAGE_MAP_COUNT) return restaurants.slice();
 
+  // Pre-select friendRecommended restaurants — they must always appear on the map
+  const preSelected = restaurants.filter((r) => r.friendRecommended);
+  const preSelectedIds = new Set(preSelected.map((r) => r.id));
+  const remaining = HOMEPAGE_MAP_COUNT - preSelected.length;
+
   const byZone = {};
   for (const z of ZONE_ORDER) byZone[z] = [];
   for (const r of restaurants) {
@@ -80,20 +89,19 @@ export function getHomepageMapRestaurants(restaurants) {
     byZone[z].push(r);
   }
 
-  const selected = [];
-  const perZone = Math.floor(HOMEPAGE_MAP_COUNT / ZONE_ORDER.length);
-  const remainder = HOMEPAGE_MAP_COUNT - perZone * ZONE_ORDER.length;
+  const selected = [...preSelected];
+  const perZone = Math.floor(remaining / ZONE_ORDER.length);
+  const remainder = remaining - perZone * ZONE_ORDER.length;
 
   for (let i = 0; i < ZONE_ORDER.length; i++) {
     const z = ZONE_ORDER[i];
     const zoneList = byZone[z];
     const want = perZone + (i < remainder ? 1 : 0);
-    const picked = pickDiverse(zoneList, Math.min(want, zoneList.length));
+    const picked = pickDiverse(zoneList, Math.min(want, zoneList.length), preSelectedIds);
     selected.push(...picked);
   }
 
-  const need = HOMEPAGE_MAP_COUNT - selected.length;
-  if (need <= 0) return selected.slice(0, HOMEPAGE_MAP_COUNT);
+  if (selected.length >= HOMEPAGE_MAP_COUNT) return selected.slice(0, HOMEPAGE_MAP_COUNT);
 
   const selectedIds = new Set(selected.map((r) => r.id));
   const rest = restaurants.filter((r) => !selectedIds.has(r.id));
@@ -115,7 +123,6 @@ export function getHomepageMapRestaurants(restaurants) {
       const list = byCuisineRest[c];
       if (round < list.length) {
         selected.push(list[round]);
-        selectedIds.add(list[round].id);
         added = true;
       }
     }

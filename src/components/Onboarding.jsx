@@ -76,7 +76,7 @@ export default function Onboarding({ onComplete }) {
               </button>
               <div className="overflow-y-auto flex-1 p-6 pt-10 text-sm text-foreground leading-relaxed">
                 <p className="mb-3">HiHi 亲爱的Mentor老师：</p>
-                <p className="mb-4">在您正式开始体验我的产品之前，有一些ReadMe内容想要和您提前说～</p>
+                <p className="mb-4">在您正式开始体验我的产品之前，有一些README内容想要和您提前说～</p>
                 <p className="mb-2">1. 本人没有在国内读大学的体验，所以用户痛点来自身边统计学和我在家的一些外卖烦恼，实际痛点有待用户调研</p>
                 <p className="mb-2">2. 核心产品设计和解决方案是"有选择的随机"：这里有两个核心场景</p>
                 <p className="pl-4 mb-1">a：不知道吃什么</p>
@@ -84,7 +84,8 @@ export default function Onboarding({ onComplete }) {
                 <p className="pl-4 mb-1">b：大概知道想吃什么，但不知道去哪家</p>
                 <p className="pl-4 mb-4">对应核心功能 「许个愿」 针对"用餐人数"和"用餐场景"的筛选进行推荐</p>
                 <p className="mb-2">3. 「今日宜食」抓住大学生群体需要性价比之选的痛点，给出今天是会员日的商户，灵感来自我经常忘了今天是疯狂星期四</p>
-                <p className="mb-4">4. 现在地图功能没接上，您脑补一下～接上的话应该是可以把摇签/许愿结果直接在地图上显示的。学校也是可以接通之后直接定位的，我现在是写死了您来自上海对外经贸大学我们现在在上海松江大学城～</p>
+                <p className="mb-2">4. 「好友给到夯」功能允许用户增添关注列表，比如我关注的舍友小帅给这几家店点了夯，增加活人推荐的可信度</p>
+                <p className="mb-4">5. 现在地图功能没接上，您脑补一下～接上的话应该是可以把摇签/许愿结果直接在地图上显示的。学校也是可以接通之后直接定位的，我现在是写死了您来自上海对外经贸大学我们现在在上海松江大学城～</p>
                 <p className="mb-4">最后，无论如何都很感谢这个机会，这真是一个酣畅淋漓的项目！！治好了我的FOMO哈哈哈～目前版本的产品基本也都还是我一拍脑袋的想法，如果可以的话非常希望能在面试里被您亲自拷打并得到一些关于产品设计上的feedback能让我继续成长！</p>
                 <p className="mb-2">祝您体验愉快～吃得香睡得好～</p>
                 <p className="mb-1">Best,</p>

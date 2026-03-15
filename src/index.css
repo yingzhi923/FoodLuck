@@ -93,3 +93,8 @@
 #map-container.map-below-nav .leaflet-control-container .leaflet-top.leaflet-left {
   top: 56px;
 }
+
+/* 允许推荐态 marker 的气泡/标签溢出 divIcon 容器 */
+.leaflet-marker-div {
+  overflow: visible !important;
+}

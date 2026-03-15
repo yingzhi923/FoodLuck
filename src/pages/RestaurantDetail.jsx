@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Navigation, Clock, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import restaurants from '@/data/restaurants';
 import { CUISINE_GRADIENTS } from '@/data/constants';
@@ -32,9 +33,12 @@ export default function RestaurantDetail() {
 
   const gradient = CUISINE_GRADIENTS[r.cuisine] || CUISINE_GRADIENTS.default;
 
-  const handleNav = () => {
-    const url = `https://www.openstreetmap.org/?mlat=${r.coordinates.lat}&mlon=${r.coordinates.lng}&zoom=17`;
-    window.open(url, '_blank');
+  const handleAddToFortune = () => {
+    toast('正在为您新建签筒...（ps此功能稍后上线哦）');
+  };
+
+  const handleOpenMap = () => {
+    toast('正在为您一键导航...（ps此功能稍后上线哦）');
   };
 
   return (
@@ -122,11 +126,14 @@ export default function RestaurantDetail() {
       {/* Fixed bottom actions */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-md border-t border-border/50 safe-area-bottom">
         <div className="flex gap-3 max-w-lg mx-auto">
-          <button className="flex-1 py-3 rounded-xl text-sm font-semibold border border-primary text-primary hover:bg-primary/5 transition-colors">
+          <button
+            onClick={handleAddToFortune}
+            className="flex-1 py-3 rounded-xl text-sm font-semibold border border-primary text-primary hover:bg-primary/5 transition-colors"
+          >
             🏮 加入签筒
           </button>
           <button
-            onClick={handleNav}
+            onClick={handleOpenMap}
             className="flex-1 py-3 rounded-xl text-sm font-semibold bg-primary text-primary-foreground flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity"
           >
             <Navigation className="w-4 h-4" />

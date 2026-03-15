@@ -10,7 +10,7 @@ const base45 = [
     scenarios: ['一个人吃', '赶时间'], description: '正宗兰州拉面，汤鲜面劲。学生党的快餐首选。',
     recommendReason: '人均18，5分钟到，赶课必备。', recommendedDishes: ['牛肉拉面', '干拌面', '牛肉盖饭'],
     isChain: false, spicyLevel: '微辣', suitableForSolo: true, suitableForGroup: false,
-    openHours: '06:30-22:00', featured: true,
+    openHours: '06:30-22:00', featured: true, friendRecommended: true,
     isHot: true, hotRank: 1,
   },
   {
@@ -51,7 +51,7 @@ const base45 = [
     scenarios: ['朋友聚餐', '约饭不踩雷', '聊天坐坐'], description: '地道湘菜小炒，辣得过瘾。适合约朋友一起吃。',
     recommendReason: '3个人人均30，辣爽解压，聚餐首选。', recommendedDishes: ['辣椒炒肉', '剁椒鱼头', '小炒黄牛肉'],
     isChain: false, spicyLevel: '辣', suitableForSolo: false, suitableForGroup: true,
-    openHours: '11:00-14:00,17:00-21:30', featured: true,
+    openHours: '11:00-14:00,17:00-21:30', featured: true, friendRecommended: true,
     isHot: true, hotRank: 2,
   },
   {
@@ -103,7 +103,7 @@ const base45 = [
     scenarios: ['一个人吃', '夜宵'], description: '正宗柳州螺蛳粉，酸辣鲜臭样样到位。',
     recommendReason: '压力大就嗦一碗粉，酸爽解压。', recommendedDishes: ['招牌螺蛳粉', '加料螺蛳粉', '干捞螺蛳粉'],
     isChain: false, spicyLevel: '辣', suitableForSolo: true, suitableForGroup: false,
-    openHours: '10:00-02:00', featured: true,
+    openHours: '10:00-02:00', featured: true, friendRecommended: true,
   },
   {
     id: '11', name: '张亮麻辣烫', campusTown: '松江大学城',
@@ -293,7 +293,7 @@ const base45 = [
     scenarios: ['朋友聚餐', '夜宵'], description: '多种口味小龙虾，夏天宵夜的灵魂。',
     recommendReason: '蒜蓉的、麻辣的、十三香的，每种都好吃！', recommendedDishes: ['蒜蓉小龙虾', '麻辣小龙虾', '冰镇小龙虾'],
     isChain: false, spicyLevel: '辣', suitableForSolo: false, suitableForGroup: true,
-    openHours: '16:00-03:00', featured: true,
+    openHours: '16:00-03:00', featured: true, friendRecommended: true,
   },
   {
     id: '30', name: '深夜食堂', campusTown: '松江大学城',
@@ -323,7 +323,7 @@ const base45 = [
     scenarios: ['约饭不踩雷', '聊天坐坐', '朋友聚餐'], description: '港风装修，菠萝油和丝袜奶茶是招牌。',
     recommendReason: '下午不想上课就来喝杯奶茶吃个菠萝油。', recommendedDishes: ['菠萝油', '丝袜奶茶', '干炒牛河'],
     isChain: false, spicyLevel: '不辣', suitableForSolo: true, suitableForGroup: true,
-    openHours: '09:00-22:00', featured: true,
+    openHours: '09:00-22:00', featured: true, friendRecommended: true,
     isHot: true, hotRank: 4,
   },
   {

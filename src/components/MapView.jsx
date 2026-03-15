@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { CAMPUS_CENTER } from '@/data/constants';
 import { useAMap } from '@/contexts/AMapContext';
@@ -81,17 +82,56 @@ export default function MapView({
     restaurants.forEach((r) => {
       const isSelected = r.id === selectedId;
       const isHighlighted = highlightSet.has(r.id);
-      const size = isSelected ? 32 : isHighlighted ? 24 : 16;
-      const bg = isSelected ? '#F97316' : isHighlighted ? '#FB923C' : '#FDBA74';
+      const isRecommended = r.friendRecommended;
+
+      let html = '';
+      let iconSize;
+      let iconAnchor;
+      let zOffset = 0;
+
+      if (isRecommended) {
+        // Use a tall icon area so the bubble + circle + optional name label aren't clipped
+        const iw = 80, ih = 72;
+        iconSize = [iw, ih];
+        // Anchor at center-bottom of the main circle (circle top starts at 20px from icon top)
+        iconAnchor = [iw / 2, 20 + 32 / 2];
+        zOffset = isSelected ? 1000 : 500;
+        const selectedBorder = isSelected ? 'border:3px solid rgba(249,115,22,0.5);' : '';
+        const selectedScale = isSelected ? 'transform:scale(1.1);' : '';
+        
+        html = `
+          <div style="position:relative;width:${iw}px;height:${ih}px;overflow:visible;pointer-events:none;">
+            <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);white-space:nowrap;background:#FF8C69;color:white;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.12);pointer-events:none;line-height:1.4;">好友给到</div>
+            <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#F97316;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;font-weight:900;box-shadow:0 4px 10px rgba(249,115,22,0.45);cursor:pointer;pointer-events:auto;${selectedBorder}${selectedScale}">夯</div>
+            ${isSelected ? `<div style="position:absolute;top:56px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#333;color:white;font-size:10px;padding:2px 6px;border-radius:4px;pointer-events:none;">${r.name}</div>` : ''}
+          </div>
+        `;
+      } else {
+        const size = isSelected ? 32 : isHighlighted ? 24 : 16;
+        const bg = isSelected ? '#F97316' : isHighlighted ? '#FB923C' : '#FDBA74';
+        iconSize = [size, size];
+        iconAnchor = [size / 2, size / 2];
+        zOffset = isSelected ? 900 : isHighlighted ? 400 : 100;
+        
+        html = `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;color:white;font-size:${isSelected ? 12 : 8}px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.2);cursor:pointer;transition:all 0.2s;border:none;pointer-events:auto;z-index:${zOffset};">${isSelected || isHighlighted ? r.name.slice(0, 1) : ''}</div>`;
+      }
+
       const icon = L.divIcon({
         className: 'leaflet-marker-div',
-        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;color:white;font-size:${isSelected ? 12 : 8}px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.2);cursor:pointer;transition:all 0.2s;border:none;pointer-events:auto">${isSelected || isHighlighted ? r.name.slice(0, 1) : ''}</div>`,
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
+        html,
+        iconSize,
+        iconAnchor,
       });
 
-      const marker = L.marker(toLeafletLatLng(r.coordinates), { icon })
-        .on('click', () => onMarkerClick?.(r.id));
+      const marker = L.marker(toLeafletLatLng(r.coordinates), { 
+        icon,
+        zIndexOffset: zOffset
+      }).on('click', () => {
+        if (isRecommended) {
+          toast('您的好友小帅给到了夯...（ps 此功能稍后上线哦）');
+        }
+        onMarkerClick?.(r.id);
+      });
 
       const popupContent = `<div class="text-sm"><strong>${r.name}</strong><br/>¥${r.avgPrice}/人 · ${r.walkingMinutes}分钟</div>`;
       marker.bindPopup(popupContent);
@@ -188,6 +228,43 @@ function PlaceholderMap({ restaurants, selectedId, highlightIds, onMarkerClick, 
       {markers.map(r => {
         const isSelected = r.id === selectedId;
         const isHighlighted = highlightSet.has(r.id);
+        const isRecommended = r.friendRecommended;
+
+        if (isRecommended) {
+          return (
+            <button
+              key={r.id}
+              onClick={() => {
+                toast('您的好友小帅给到了夯...（ps 此功能稍后上线哦）');
+                onMarkerClick?.(r.id);
+              }}
+              className={cn(
+                'absolute transition-all duration-200 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center',
+                isSelected ? 'z-40' : 'z-30'
+              )}
+              style={{ left: `${r.pos.x}%`, top: `${r.pos.y}%` }}
+              title={r.name}
+            >
+              <div className="relative">
+                <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#FF8C69] text-white text-[10px] px-1.5 py-0.5 rounded-full shadow-sm z-50">
+                  好友给到
+                </div>
+                <div className={cn(
+                  "w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-[16px] font-black shadow-md transition-all",
+                  isSelected ? "ring-4 ring-primary/30 scale-110" : "hover:scale-105"
+                )} style={{ boxShadow: '0 4px 8px rgba(249,115,22,0.4)' }}>
+                  夯
+                </div>
+                {isSelected && (
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap px-1.5 py-0.5 rounded bg-foreground text-white text-[10px] font-medium z-50">
+                    {r.name}
+                  </div>
+                )}
+              </div>
+            </button>
+          );
+        }
+
         return (
           <button
             key={r.id}
