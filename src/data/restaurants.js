@@ -1,4 +1,7 @@
-const restaurants = [
+import { getRestaurantCoordinate, getWalkingFromCoordinate } from './coordinateDistribution';
+import { buildNewRestaurants46To200 } from './newRestaurants46to200';
+
+const base45 = [
   {
     id: '1', name: '老马兰州拉面', campusTown: '松江大学城',
     cuisine: '面食', category: ['正餐', '小吃'], avgPrice: 18, walkingMinutes: 5,
@@ -454,5 +457,14 @@ const restaurants = [
     openHours: '11:00-22:00', featured: false,
   },
 ];
+
+const restaurantsWithNewCoords = base45.map((r, i) => {
+  const coordinates = getRestaurantCoordinate(i);
+  const { walkingMinutes, distanceText } = getWalkingFromCoordinate(coordinates);
+  return { ...r, coordinates, walkingMinutes, distanceText };
+});
+
+const newRestaurants155 = buildNewRestaurants46To200();
+const restaurants = [...restaurantsWithNewCoords, ...newRestaurants155];
 
 export default restaurants;

@@ -6,6 +6,7 @@ import MapView from '@/components/MapView';
 import BottomSheet from '@/components/BottomSheet';
 import FortuneModal from '@/components/fortune/FortuneModal';
 import restaurants from '@/data/restaurants';
+import { getHomepageMapRestaurants } from '@/utils/getHomepageMapRestaurants';
 import { cn } from '@/lib/utils';
 import { CUISINE_GRADIENTS } from '@/data/constants';
 
@@ -31,6 +32,11 @@ export default function Index() {
     []
   );
 
+  const homepageMapRestaurants = useMemo(
+    () => getHomepageMapRestaurants(restaurants),
+    []
+  );
+
   const handleMarkerClick = useCallback((id) => {
     setSelectedId(id);
   }, []);
@@ -40,7 +46,7 @@ export default function Index() {
       <TopNav onFortuneClick={() => setFortuneOpen(true)} />
 
       <MapView
-        restaurants={restaurants}
+        restaurants={homepageMapRestaurants}
         selectedId={selectedId}
         highlightIds={[]}
         onMarkerClick={handleMarkerClick}
