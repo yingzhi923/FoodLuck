@@ -6,21 +6,25 @@
 
 const HOMEPAGE_MAP_COUNT = 20;
 
-// 与默认地图视野一致，用于分区（中部 + 东南西北）
+// 与 coordinateDistribution 的 VIEW 一致，用于分区（中部 + 东南西北）
 const VIEW = {
-  lngMin: 121.205,
-  lngMax: 121.230,
-  latMin: 31.038,
-  latMax: 31.056,
+  lngMin: 121.196079935786,
+  lngMax: 121.24023059840819,
+  latMin: 31.03833716657116,
+  latMax: 31.05688261672305,
 };
 
 function getZone(r) {
   const { lng, lat } = r.coordinates;
-  if (lng >= 121.212 && lng <= 121.220 && lat >= 31.043 && lat <= 31.049) return 'center';
-  if (lat >= 31.050) return 'north';
-  if (lat <= 31.042) return 'south';
-  if (lng >= 121.223) return 'east';
-  if (lng <= 121.209) return 'west';
+  const lngMid = (VIEW.lngMin + VIEW.lngMax) / 2;
+  const latMid = (VIEW.latMin + VIEW.latMax) / 2;
+  const lngW = (VIEW.lngMax - VIEW.lngMin) * 0.25;
+  const latH = (VIEW.latMax - VIEW.latMin) * 0.25;
+  if (lng >= lngMid - lngW && lng <= lngMid + lngW && lat >= latMid - latH && lat <= latMid + latH) return 'center';
+  if (lat >= latMid + latH) return 'north';
+  if (lat <= latMid - latH) return 'south';
+  if (lng >= lngMid + lngW) return 'east';
+  if (lng <= lngMid - lngW) return 'west';
   return 'center';
 }
 
