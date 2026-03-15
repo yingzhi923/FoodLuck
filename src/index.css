@@ -88,3 +88,8 @@
     padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem);
   }
 }
+
+/* 地图在顶栏下方时，把 Leaflet 左上角缩放控件下移，避免被顶栏遮挡 */
+#map-container.map-below-nav .leaflet-control-container .leaflet-top.leaflet-left {
+  top: 56px;
+}
