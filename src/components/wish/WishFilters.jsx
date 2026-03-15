@@ -17,6 +17,13 @@ export default function WishFilters({ filters, onChange }) {
       />
 
       <FilterChips
+        label="场景"
+        options={SCENARIOS}
+        value={filters.scenario}
+        onChange={v => update('scenario', v)}
+      />
+
+      <FilterChips
         label="人均预算"
         options={BUDGET_OPTIONS}
         value={filters.budget}
@@ -35,13 +42,6 @@ export default function WishFilters({ filters, onChange }) {
         options={['中餐', '日料', '韩餐', '泰餐', '西式', '烧烤', '麻辣烫', '火锅', '奶茶甜品']}
         value={filters.cuisine}
         onChange={v => update('cuisine', v)}
-      />
-
-      <FilterChips
-        label="场景"
-        options={SCENARIOS}
-        value={filters.scenario}
-        onChange={v => update('scenario', v)}
       />
 
       {/* Supplementary text input */}

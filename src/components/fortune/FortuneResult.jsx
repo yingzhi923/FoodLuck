@@ -1,6 +1,7 @@
 import React from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { CUISINE_GRADIENTS } from '@/data/constants';
 import iconPng from '@/assets/brand/icon.png';
@@ -37,11 +38,26 @@ export default function FortuneResult({ restaurant, fortune, onReshake }) {
         </div>
       </motion.div>
 
-      {/* Re-shake */}
+      {/* Go CTA */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
+      >
+        <button
+          onClick={() => toast('现在为您一键导航…（ps 此功能稍后上线哦）')}
+          className="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-primary to-orange-400 hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2 transition-all shadow-md"
+        >
+          <Navigation className="w-4 h-4" />
+          一键前往
+        </button>
+      </motion.div>
+
+      {/* Re-shake */}
+      <motion.div
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4 }}
       >
         <button
           onClick={onReshake}

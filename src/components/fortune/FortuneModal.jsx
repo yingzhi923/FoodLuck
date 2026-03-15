@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ChevronLeft, Sparkles, Dices } from 'lucide-react';
+import { X, ChevronLeft, Sparkles, Dices, BadgePercent } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import ConditionSelect from './ConditionSelect';
 import CandidatePool from './CandidatePool';
 import ShakeAnimation from './ShakeAnimation';
@@ -10,6 +11,7 @@ import restaurants from '@/data/restaurants';
 import { filterRestaurants, getRandomItems } from '@/utils/filter';
 import { generateFortune } from '@/utils/fortune';
 import useFortuneStore from '@/hooks/useFortuneStore';
+import { getTodayOffers } from '@/data/memberDayOffers';
 import iconPng from '@/assets/brand/icon.png';
 
 const SHAKE_DURATION_MS = 2800;
@@ -17,6 +19,7 @@ const SHAKE_DURATION_MS = 2800;
 const MODE_SELECT = 'mode';
 const MODE_DRAW = 'draw';
 const MODE_WISH = 'wish';
+const MODE_TODAY = 'today';
 
 export default function FortuneModal({ open, onClose }) {
   const [mode, setMode] = useState(MODE_SELECT);
@@ -172,6 +175,7 @@ export default function FortuneModal({ open, onClose }) {
             {mode === MODE_SELECT && (
               <motion.div key="mode-select" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                 <ModeSelectView
+                  onTodayClick={() => setMode(MODE_TODAY)}
                   onDrawClick={() => setMode(MODE_DRAW)}
                   onWishClick={() => setMode(MODE_WISH)}
                 />
@@ -214,6 +218,13 @@ export default function FortuneModal({ open, onClose }) {
               </motion.div>
             )}
 
+            {/* Today deals flow */}
+            {mode === MODE_TODAY && (
+              <motion.div key="today" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <TodayDealsPanel />
+              </motion.div>
+            )}
+
             {/* Wish flow */}
             {mode === MODE_WISH && (
               <motion.div key="wish" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -227,10 +238,27 @@ export default function FortuneModal({ open, onClose }) {
   );
 }
 
-function ModeSelectView({ onDrawClick, onWishClick }) {
+function ModeSelectView({ onTodayClick, onDrawClick, onWishClick }) {
+  const todayLabel = ['周日','周一','周二','周三','周四','周五','周六'][new Date().getDay()];
+
   return (
     <div className="space-y-4 py-2">
       <p className="text-center text-sm text-muted-foreground">选择你想怎么决定今天吃什么</p>
+
+      <button
+        onClick={onTodayClick}
+        className="w-full p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200/60 hover:border-emerald-300 hover:shadow-md active:scale-[0.98] transition-all text-left group"
+      >
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-sm">
+            <BadgePercent className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="font-bold text-lg">今日宜食</h3>
+        </div>
+        <p className="text-sm text-muted-foreground pl-[52px]">
+          今天{todayLabel}，看看哪里最划算
+        </p>
+      </button>
 
       <button
         onClick={onDrawClick}
@@ -261,6 +289,47 @@ function ModeSelectView({ onDrawClick, onWishClick }) {
           已经有点想法，按条件找合适的店
         </p>
       </button>
+    </div>
+  );
+}
+
+function TodayDealsPanel() {
+  const todayData = getTodayOffers();
+
+  const handleDealClick = (brand) => {
+    toast('现在为您一键导航…（ps 此功能稍后上线哦）');
+  };
+
+  return (
+    <div className="space-y-4 pb-4">
+      <div className="text-center">
+        <h3 className="text-lg font-bold">今日宜食</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          今天是{todayData.title}，这些品牌更划算
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        {todayData.items.map((item, i) => (
+          <button
+            key={`${item.brand}-${i}`}
+            onClick={() => handleDealClick(item.brand)}
+            className="w-full flex items-center justify-between p-3.5 rounded-xl bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 hover:border-emerald-300 hover:shadow-sm active:scale-[0.98] transition-all text-left"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-sm">{item.brand}</p>
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.offer}</p>
+            </div>
+            <span className="shrink-0 ml-3 px-3 py-1 rounded-full bg-emerald-500 text-white text-xs font-medium">
+              {item.ctaLabel}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <p className="text-xs text-muted-foreground/70 text-center pt-2">
+        优惠信息仅供参考，以平台实时活动为准
+      </p>
     </div>
   );
 }

@@ -24,10 +24,10 @@ export default function TopNav({ onFortuneClick }) {
 
         <button
           onClick={onFortuneClick}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-orange-400 text-white font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition-all"
+          className="flex items-center gap-1.5 px-5 py-1.5 rounded-full bg-gradient-to-r from-primary via-orange-400 to-amber-400 text-white font-black text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all ring-2 ring-orange-200/50"
         >
-          <img src={iconPng} alt="" className="w-5 h-5 object-contain" />
-          <span>今日食运</span>
+          <img src={iconPng} alt="" className="w-6 h-6 object-contain drop-shadow-sm" />
+          <span className="tracking-wide">今日食运</span>
         </button>
 
         <div className="flex items-center gap-1">

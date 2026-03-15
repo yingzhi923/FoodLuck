@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, ChevronRight } from 'lucide-react';
 import { SCHOOLS } from '@/data/constants';
+import iconPng from '@/assets/brand/icon.png';
 
 const ONBOARDING_KEY = 'onboarding_done';
 
@@ -49,9 +50,9 @@ export default function Onboarding({ onComplete }) {
             <motion.div
               animate={{ rotate: [0, -5, 5, -3, 3, 0] }}
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-              className="text-7xl mb-6"
+              className="mb-6"
             >
-              🏮
+              <img src={iconPng} alt="今日食运" className="w-20 h-20 object-contain" />
             </motion.div>
             <h1 className="text-3xl font-black text-foreground mb-2">今日食运</h1>
             <p className="text-base text-muted-foreground text-center leading-relaxed">
