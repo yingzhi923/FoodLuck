@@ -21,7 +21,7 @@ const MODE_DRAW = 'draw';
 const MODE_WISH = 'wish';
 const MODE_TODAY = 'today';
 
-const exitAbsolute = { position: 'absolute', left: 0, right: 0, top: 0 };
+const exitAbsolute = { position: 'absolute', left: 0, right: 0, top: 0, pointerEvents: 'none' };
 
 export default function FortuneModal({ open, onClose }) {
   const [mode, setMode] = useState(MODE_SELECT);

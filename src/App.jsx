@@ -18,7 +18,7 @@ const AppContent = () => {
   return (
     <>
       <Toaster />
-      <HashRouter>
+      <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           {navItems.map(({ to, page }) => (
             <Route key={to} path={to} element={page} />
